@@ -3,7 +3,7 @@ import { IsString, Length } from "class-validator";
 
 export class CreateArticleDto {
     @IsString()
-    @Length(10,500)
+    @Length(2,500)
     @ApiProperty({default: "CSS"})
     heading: string;
 
