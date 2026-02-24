@@ -5,7 +5,6 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { CreateAuthDto, LoginAuthDto } from "./dto/create-auth.dto";
-import { UpdateAuthDto } from "./dto/update-auth.dto";
 import { Auth } from "./entities/auth.entity";
 import * as bcrypt from "bcrypt";
 import * as nodemailer from "nodemailer";
@@ -90,7 +89,7 @@ export class AuthService {
 
       await this.authRepository.update(foundedUser.id, {otp: "", otpTime: 0})
 
-      const payload = { email: foundedUser.email, role: foundedUser.role };
+      const payload = { email: foundedUser.email, roles: foundedUser.role };
       const access_token = await this.jwtService.signAsync(payload);
       return {
         access_token,

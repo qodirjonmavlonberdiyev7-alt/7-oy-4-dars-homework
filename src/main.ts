@@ -15,18 +15,18 @@ async function bootstrap() {
 
   //swagger
   const config = new DocumentBuilder()
-  .setTitle("Article project")
-  .setDescription("article documantation")
-  .setVersion("1.0.0")
+  .setTitle('NestJS API')
+  .setDescription('User, Auth va Product API documentation')
+  .setVersion('1.0')
   .addBearerAuth({
-    type: "http",
-    scheme: "bearer",
-    name: "JWT",
-    bearerFormat: "JWT",
-    description: "JWT token from header",
-    in: "header"
+    type: 'http',
+    scheme: 'bearer',
+    bearerFormat: 'JWT',
+    name: 'JWT',
+    description: 'Enter JWT token',
+    in: 'header'
   },
-  "JWT-auth",
+  'JWT-auth',
 )
   .build()
 
