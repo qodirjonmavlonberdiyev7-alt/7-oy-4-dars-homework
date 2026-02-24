@@ -5,9 +5,8 @@ import { Auth } from './module/auth/entities/auth.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ArticleModule } from './module/article/article.module';
 import { Article } from './module/article/entities/article.entity';
-import { APP_GUARD } from '@nestjs/core';
-import { AuthGuard } from './common/guard/auth.guard';
-import { RolesGuard } from './common/guard/roles.guard';
+import { Tag } from './module/tags/entities/tag.entity';
+import { TagsModule } from './module/tags/tags.module';
 
 @Module({
   imports: [
@@ -19,12 +18,13 @@ import { RolesGuard } from './common/guard/roles.guard';
       host: "localhost",
       password: String(process.env.DB_PASSWORD),
       database: String(process.env.DB_NAME),
-      entities: [Auth, Article],
+      entities: [Auth, Article, Tag],
       synchronize: true,
       logging: false
     }),
     AuthModule,
-    ArticleModule
+    ArticleModule,
+    TagsModule
   ],
   controllers: [],
   providers: [],
