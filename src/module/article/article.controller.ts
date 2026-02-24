@@ -58,6 +58,8 @@ export class ArticleController {
     return this.articleService.findOne(+id);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({description: "Update article api (owner)"})
   @ApiBody({type: CreateArticleDto})
   @ApiNotFoundResponse({description: "Article not found"})
@@ -67,6 +69,8 @@ export class ArticleController {
     return this.articleService.update(+id, updateArticleDto);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({description: "Delete article api (owner)"})
   @ApiNotFoundResponse({description: "Article not found"})
   @ApiOkResponse({description: "Deleted article"})
