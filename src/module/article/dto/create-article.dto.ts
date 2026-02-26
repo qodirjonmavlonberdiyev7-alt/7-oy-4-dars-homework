@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, Length } from "class-validator";
+import { Transform } from "class-transformer";
+import { IsArray, IsInt, IsString, Length } from "class-validator";
 
 export class CreateArticleDto {
     @IsString()
@@ -11,4 +12,14 @@ export class CreateArticleDto {
     @Length(20,2000)
     @ApiProperty({default: "CSS is most popular style sheets in the world"})
     body: string;
+
+    @Transform(({value}) =>
+    typeof value === "string"
+      ? value.split(",").map((v) => Number(v))
+      : value
+    )
+    @IsArray()
+    @IsInt({each: true})
+    @ApiProperty({default: [1, 2, 3]})
+    tags: number[];
 }

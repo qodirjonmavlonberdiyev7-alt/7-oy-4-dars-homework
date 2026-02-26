@@ -26,8 +26,8 @@ export class Auth  extends BaseEntity{
 
     //relations
     @OneToMany(() => Article, (article) => article.author)
-    articles: Article;
+    articles: Article[];
 
     @OneToMany(() => Tag, (tag) => tag.createdBy)
-    tags: Tag;
+    tags: Tag[];
 }
