@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsNumber, IsOptional} from "class-validator";
+import { IsNumber, IsOptional, IsString} from "class-validator";
 
 export class QueryDto {
     @IsNumber()
@@ -15,8 +15,8 @@ export class QueryDto {
     @ApiProperty({default: 10, minimum: 1, maximum: 100})
     limit?: number = 10; 
 
-    @IsNumber()
+    @IsString()
     @IsOptional()
-    @ApiProperty()
+    @ApiProperty({default: "HTML"})
     search?: string
 }

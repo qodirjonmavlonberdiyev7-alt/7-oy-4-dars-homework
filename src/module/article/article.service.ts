@@ -48,8 +48,20 @@ async  findAll(query: QueryDto) {
         })
       }
 
+      const total = await queryBuilder.getCount()
 
-      return queryBuilder.orderBy("article.createdAt", "DESC")
+      const result = queryBuilder.orderBy("article.createdAt", "DESC")
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany()
+
+      return {
+        next: total > (page * limit) ? {page: page + 1, limit} : undefined,
+        prev: page > 1 ? {page: page - 1, limit} : undefined,
+        totalPage: Math.ceil(total / limit),
+        result,
+      }
+      
     } catch (error) {
       throw new InternalServerErrorException(error.message)
     }
