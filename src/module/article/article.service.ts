@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Article } from './entities/article.entity';
 import { In, Repository } from 'typeorm';
 import { Tag } from '../tags/entities/tag.entity';
+import { QueryDto } from './dto/query.dto';
 
 @Injectable()
 export class ArticleService {
@@ -31,9 +32,24 @@ async create(createArticleDto: CreateArticleDto, file: Express.Multer.File, user
     }
   }
 
-async  findAll(): Promise<Article[]> {
+async  findAll(query: QueryDto) {
     try {
-      return await this.articleRepo.find()
+      const {page = 1, limit = 10, search} = query
+
+      const queryBuilder = await this.articleRepo.createQueryBuilder("article")
+      .leftJoinAndSelect("article.tags", "tags")
+      .leftJoinAndSelect("article.author", "author")
+      .where("article.isActive = :isActive", {isActive: true})
+      .andWhere("article.deletedAt is null")
+
+      if(search) {
+        queryBuilder.andWhere("(article.heading ILIKE :search OR article.body ILIKE :search OR tags.name ILIKE :search)", {
+          search: `%${search}%`
+        })
+      }
+
+
+      return queryBuilder.orderBy("article.createdAt", "DESC")
     } catch (error) {
       throw new InternalServerErrorException(error.message)
     }
@@ -41,7 +57,11 @@ async  findAll(): Promise<Article[]> {
 
   async  findAllMyArticles(userId): Promise<Article[]> {
     try {
-      return await this.articleRepo.find({where: {author: userId}})
+      const articles = await this.articleRepo.find(
+        {where: {author: userId},
+        relations: ["tags", "author"]
+      })
+      return articles
     } catch (error) {
       throw new InternalServerErrorException(error.message)
     }
@@ -73,13 +93,13 @@ async  findOne(id: number): Promise<Article> {
 //     }
 //   }
 
-async  remove(id: number): Promise<{message: string}>  {
+async  remove(id: number, userId): Promise<{message: string}>  {
     try {
       const foundedArticle = await this.articleRepo.findOne({where: {id}})
 
       if(!foundedArticle) throw new NotFoundException("Article not found")
 
-      await this.articleRepo.delete(foundedArticle.id)  
+      await this.articleRepo.softDelete(foundedArticle.id)  
 
       return {message: "Deleted article"}
     } catch (error) {
