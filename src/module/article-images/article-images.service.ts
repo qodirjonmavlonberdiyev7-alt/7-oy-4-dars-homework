@@ -1,11 +1,55 @@
-import { Injectable } from '@nestjs/common';
-import { CreateArticleImageDto } from './dto/create-article-image.dto';
-import { UpdateArticleImageDto } from './dto/update-article-image.dto';
+import { BadRequestException, Injectable, InternalServerErrorException } from "@nestjs/common";
+import { CreateArticleImageDto } from "./dto/create-article-image.dto";
+import { UpdateArticleImageDto } from "./dto/update-article-image.dto";
+import { InjectRepository } from "@nestjs/typeorm";
+import { ArticleImage } from "./entities/article-image.entity";
+import { Article } from "../article/entities/article.entity";
+import { Repository } from "typeorm";
 
 @Injectable()
 export class ArticleImagesService {
-  create(createArticleImageDto: CreateArticleImageDto) {
-    return 'This action adds a new articleImage';
+  private readonly max_images = 10;
+  constructor(
+    @InjectRepository(ArticleImage)
+    private articleImageRepository: Repository<ArticleImage>,
+    @InjectRepository(Article) private articleRepository: Repository<Article>,
+  ) {}
+  async create(
+    createArticleImageDto: CreateArticleImageDto,
+    files: Express.Multer.File[],
+  ) {
+    try {
+      const foundedArticle = await this.articleRepository.find({
+      where: { id: createArticleImageDto.articleId },
+    });
+
+    if (!foundedArticle) throw new BadRequestException("Article not found");
+
+    let foundedImages = await this.articleImageRepository.find({
+      where: { article: { id: createArticleImageDto.articleId } },
+    });
+
+    if (foundedImages.length + files.length > this.max_images)
+      throw new BadRequestException("Limit has been exceeded");
+
+    let sortOrder: number = foundedImages.length + 1;
+    let result: ArticleImage[] = [];
+
+    for (const file of files) {
+      const createdImage = await this.articleImageRepository.create({
+        url: `http://localhost:4001/uploads/${file.filename}`,
+        sortOrder,
+        article: { id: createArticleImageDto.articleId },
+      });
+
+      sortOrder++;
+      result.push(await this.articleImageRepository.save(createdImage));
+    }
+
+    return result;
+    } catch (error){
+      throw new InternalServerErrorException(error.message)
+    }
   }
 
   findAll() {
